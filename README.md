@@ -57,6 +57,11 @@ cd mcp-router-*-linux-x64
 Prebuilt for x86_64 and needs glibc 2.34 or newer (Ubuntu 22.04+, Debian 12+, Fedora 35+, Arch).
 On anything else, build from source.
 
+> [!TIP]
+> On **Windows or macOS**, use the original's signed final release instead:
+> [mcp-router v0.6.4](https://github.com/mcp-router/mcp-router/releases/tag/v0.6.4). This fork only
+> builds and tests Linux.
+
 ## Build and install from source
 
 Requirements: Node.js 20+, pnpm 10, and a C/C++ toolchain with Python (for the `better-sqlite3` and
