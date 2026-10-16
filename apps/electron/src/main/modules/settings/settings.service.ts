@@ -1,4 +1,7 @@
 import { app, nativeTheme } from "electron";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { AppSettings, Theme } from "@mcp_router/shared";
 import { SingletonService } from "../singleton-service";
 import { SettingsRepository } from "./settings.repository";
@@ -79,6 +82,11 @@ export function getSettingsService(): SettingsService {
  * OS起動時のウィンドウ表示設定に応じてログイン項目設定を更新
  */
 export function applyLoginItemSettings(showWindowOnStartup: boolean): void {
+  if (process.platform === "linux") {
+    applyLinuxAutostart(showWindowOnStartup);
+    return;
+  }
+
   try {
     const loginItemOptions: Electron.Settings = {
       openAtLogin: true,
@@ -93,6 +101,42 @@ export function applyLoginItemSettings(showWindowOnStartup: boolean): void {
     app.setLoginItemSettings(loginItemOptions);
   } catch (error) {
     console.error("Failed to update login item settings:", error);
+  }
+}
+
+/**
+ * Linux: app.setLoginItemSettings is a no-op, so write an XDG autostart entry
+ * (~/.config/autostart/mcp-router.desktop) instead.
+ */
+function applyLinuxAutostart(showWindowOnStartup: boolean): void {
+  // Only packaged builds have a stable executable path worth registering
+  if (!app.isPackaged) return;
+
+  try {
+    // When running from an AppImage, execPath points into a temporary mount
+    const executable = process.env.APPIMAGE || process.execPath;
+    const configHome =
+      process.env.XDG_CONFIG_HOME || path.join(os.homedir(), ".config");
+    const autostartDir = path.join(configHome, "autostart");
+    const args = showWindowOnStartup ? "" : " --hidden";
+    // Some launchers don't unquote Exec, so only quote paths that need it
+    const exec = executable.includes(" ") ? `"${executable}"` : executable;
+
+    const entry = [
+      "[Desktop Entry]",
+      "Type=Application",
+      "Name=MCP Router",
+      `Exec=${exec}${args}`,
+      "Icon=mcp-router",
+      "Terminal=false",
+      "X-GNOME-Autostart-enabled=true",
+      "",
+    ].join("\n");
+
+    fs.mkdirSync(autostartDir, { recursive: true });
+    fs.writeFileSync(path.join(autostartDir, "mcp-router.desktop"), entry);
+  } catch (error) {
+    console.error("Failed to update Linux autostart entry:", error);
   }
 }
 

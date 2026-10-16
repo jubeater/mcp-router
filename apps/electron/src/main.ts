@@ -32,6 +32,19 @@ if (!gotTheLock) {
   app.exit();
 }
 
+// Linux: Chromium only picks a keyring backend for desktops it recognizes
+// (GNOME, KDE, ...). Elsewhere (niri, sway, Hyprland, ...) it falls back to
+// "basic_text" and safeStorage reports encryption unavailable, so secrets
+// would be stored in plain text. Use the Secret Service API unless the user
+// chose a backend explicitly.
+if (
+  process.platform === "linux" &&
+  !app.commandLine.hasSwitch("password-store") &&
+  !/KDE/i.test(process.env.XDG_CURRENT_DESKTOP ?? "")
+) {
+  app.commandLine.appendSwitch("password-store", "gnome-libsecret");
+}
+
 // Listen for second instance launches and focus the existing window
 app.on("second-instance", (_event, commandLine) => {
   // Show the app in the Dock on macOS
@@ -388,6 +401,20 @@ async function initApplication(): Promise<void> {
 
   // UI初期化
   initUI({ showMainWindow: shouldShowMainWindow });
+
+  // Linux / Windows: a cold start from an mcpr:// link passes the URL in argv
+  // (macOS uses the open-url event instead)
+  const launchUrl = process.argv.find((arg) => arg.startsWith("mcpr://"));
+  if (launchUrl && mainWindow) {
+    mainWindow.show();
+    if (mainWindow.webContents.isLoading()) {
+      mainWindow.webContents.once("did-finish-load", () =>
+        handleProtocolUrl(launchUrl),
+      );
+    } else {
+      handleProtocolUrl(launchUrl);
+    }
+  }
 }
 
 app.on("ready", initApplication);

@@ -27,6 +27,8 @@ const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
     icon: "./public/images/icon/icon",
+    // Linux: avoid a space in the binary name so .desktop Exec lines stay simple
+    executableName: process.platform === "linux" ? "mcp-router" : undefined,
     // Support both Intel and Apple Silicon architectures - use target arch from env
     arch: (process.env.npm_config_target_arch as any) || process.arch,
     // Only sign/notarize on macOS when credentials are available (CI-safe)
