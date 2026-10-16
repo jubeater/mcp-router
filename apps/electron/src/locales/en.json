@@ -316,11 +316,6 @@
     }
   },
   "retirement": {
-    "title": "MCP Router has reached end of support",
-    "summary": "Development, support and security updates ended on September 18, 2026. Cloud services and billing have ended.",
-    "local": "Your local MCP servers and saved settings remain available. Sign-in, cloud sync and feedback submission are no longer available.",
-    "export": "Before migrating, select each local workspace and use Export on the Servers screen. Keep exported files private: they may contain credentials.",
-    "continue": "Continue using local features",
-    "details": "End-of-support and migration guide"
+    "local": "Your local MCP servers and saved settings remain available. Sign-in, cloud sync and feedback submission are no longer available."
   }
 }
