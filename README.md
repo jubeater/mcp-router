@@ -20,7 +20,44 @@ final release already disables it along with auto-updates.
 - Connect clients to the router (Claude Desktop, Cursor, Windsurf, Cline, VS Code, Codex, or any custom client)
 - Request logs and usage stats
 
-## Build and install
+<details>
+<summary><strong>Screenshots</strong> (Linux, Wayland)</summary>
+
+<br>
+
+**MCP servers**
+
+<img src="docs/screenshots/linux-servers.png" alt="MCP server list" width="800">
+
+**Adding a server** (JSON import, DXT, manual or remote)
+
+<img src="docs/screenshots/linux-servers-add.png" alt="Add MCP server" width="800">
+
+**Client integrations**
+
+<img src="docs/screenshots/linux-clients.png" alt="MCP app integrations" width="800">
+
+**Settings**
+
+<img src="docs/screenshots/linux-settings.png" alt="Settings" width="800">
+
+</details>
+
+## Install from a release
+
+Download `mcp-router-<version>-linux-x64.tar.gz` from
+[Releases](https://github.com/jubeater/mcp-router/releases), then:
+
+```bash
+tar -xzf mcp-router-*-linux-x64.tar.gz
+cd mcp-router-*-linux-x64
+./install.sh
+```
+
+Prebuilt for x86_64 and needs glibc 2.34 or newer (Ubuntu 22.04+, Debian 12+, Fedora 35+, Arch).
+On anything else, build from source.
+
+## Build and install from source
 
 Requirements: Node.js 20+, pnpm 10, and a C/C++ toolchain with Python (for the `better-sqlite3` and
 `argon2` native modules).
@@ -46,10 +83,10 @@ Then launch **MCP Router** from your app menu, or run `mcp-router`.
 | Icon              | `~/.local/share/icons/hicolor/512x512/apps/`     |
 | `mcpr://` handler | registered with `xdg-mime`                       |
 
-**Update:** pull, rebuild with the commands above, quit the app (tray → Quit), and run
-`tools/linux/install.sh` again.
+**Update:** quit the app (tray → Quit), then run `install.sh` from a newer release, or pull, rebuild
+with the commands above, and run `tools/linux/install.sh` again.
 
-**Uninstall:** `tools/linux/install.sh --uninstall`. Your settings and server data in
+**Uninstall:** `install.sh --uninstall` (from a release or `tools/linux/`). Your settings and server data in
 `~/.config/MCP Router/` are kept; delete that folder too for a full removal.
 
 ## Connecting a client

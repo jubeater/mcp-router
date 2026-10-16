@@ -6,9 +6,16 @@
 #   tools/linux/install.sh --uninstall               # remove (keeps app data)
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-BUILD_DIR="$REPO_ROOT/apps/electron/out/MCP Router-linux-x64"
-ICON_SRC="$REPO_ROOT/apps/electron/public/images/icon/icon.png"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -x "$SCRIPT_DIR/app/mcp-router" ]]; then
+  # Running from an extracted release tarball (see make-release.sh)
+  BUILD_DIR="$SCRIPT_DIR/app"
+  ICON_SRC="$SCRIPT_DIR/icon.png"
+else
+  REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+  BUILD_DIR="$REPO_ROOT/apps/electron/out/MCP Router-linux-x64"
+  ICON_SRC="$REPO_ROOT/apps/electron/public/images/icon/icon.png"
+fi
 
 DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -77,6 +84,7 @@ MimeType=x-scheme-handler/mcpr;
 EOF
 
 refresh_caches
+mkdir -p "$CONFIG_HOME" # xdg-mime writes mimeapps.list here
 xdg-mime default mcp-router.desktop x-scheme-handler/mcpr
 
 echo "Installed to $APP_DIR"
