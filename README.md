@@ -1,103 +1,94 @@
-> **End of support — September 18, 2026.** Development, support and security updates have ended. Cloud services and billing have stopped. v0.6.4 is the final desktop release for existing users; local features remain available. New adoption is not recommended. [End-of-support and migration guide](docs/END_OF_SUPPORT.md).
+# MCP Router for Linux (unofficial patch)
 
-The material below describes the historical product. Cloud features are no longer available.
+A Linux build of [MCP Router](https://github.com/mcp-router/mcp-router), a desktop app for managing
+Model Context Protocol (MCP) servers in one place and connecting them to AI clients.
 
-<h1 align="center">MCP Router</h1>
-<h3 align="center">A Unified MCP Server Management App</h3>
+> [!NOTE]
+> This is an **unofficial, personal patch** of
+> [mcp-router/mcp-router](https://github.com/mcp-router/mcp-router), based on its final release
+> (v0.6.4). The original project ended support on 2026-09-18 and only ever shipped for macOS and
+> Windows. This fork is not affiliated with or endorsed by the original authors, and is maintained for
+> personal, non-commercial use only.
 
-<div align="center">
+## What works
 
-[![GitHub stars](https://img.shields.io/github/stars/mcp-router/mcp-router?style=flat&logo=github&label=Star)](https://github.com/mcp-router/mcp-router)
-[![Discord](https://img.shields.io/badge/Discord-Join%20Us-7289DA?style=flat&logo=discord)](https://discord.com/invite/dwG9jPrhxB)
-[![X](https://img.shields.io/badge/X(Twitter)-@mcp__router-1DA1F2?style=flat&logo=x)](https://x.com/mcp_router)
+Only the local features. The original cloud service (sign-in, sync, billing) has been shut down, and the
+final release already disables it along with auto-updates.
 
-[English | [日本語](https://github.com/mcp-router/mcp-router/blob/main/README_ja.md) | [中文](https://github.com/mcp-router/mcp-router/blob/main/README_zh.md)]
+- Add local (stdio) and remote MCP servers, and toggle servers and individual tools on or off
+- Organize servers into Projects and Workspaces
+- Connect clients to the router (Claude Desktop, Cursor, Windsurf, Cline, VS Code, Codex, or any custom client)
+- Request logs and usage stats
 
-</div>
+## Build and install
 
-## 🎯 Overview
+Requirements: Node.js 20+, pnpm 10, and a C/C++ toolchain with Python (for the `better-sqlite3` and
+`argon2` native modules).
 
-**MCP Router** is a desktop application for simplifies the management of Model Context Protocol (MCP) servers.
-
-### ✨ Key Features
-
-- 🌐 **Universal** — Connect to any MCP server
-  - Remote or local servers
-  - Supports DXT, JSON, Manual
-- 🖥️ **Cross-platform** — Windows and macOS
-- 🗂 **Context Management** — Keep growing MCP server contexts organized
-  - Group MCP servers into Projects
-  - Manage modes with Workspaces (like browser profiles)
-  - Toggle tools on/off per server
-
-## 🔒 Privacy & Security
-
-### Your Data Stays Local
-- ✅ **All data is stored locally** - Request logs, configurations, and server data remain on your device
-- ✅ **Credentials are secure** - API keys and authentication credentials are stored locally and never transmitted externally
-- ✅ **Complete control** - You have full control over your MCP server connections and data
-
-### Transparency
-- 🔍 **Auditable** - The desktop application source code is publicly available on GitHub
-- 🛡️ **Verifiable privacy** - You can verify that your data stays local by examining the application code
-- 🤝 **Community-driven** - Security improvements and audits are welcomed from the [community](https://discord.com/invite/dwG9jPrhxB)
-
-
-## 📥 Installation
-
-Download from our [releases page](https://github.com/mcp-router/mcp-router/releases).
-
-After setting up MCP Router, you can connect to MCP Router using the CLI:
 ```bash
-# Set your MCP Router token (Issued when adding a custom app)
-export MCPR_TOKEN="mcpr_your_token"
-# To connect to MCP Router, run:
-npx -y @mcp_router/cli connect
-
-# If you want to use project, run:
-npx -y @mcp_router/cli connect --project <project-name>
+git clone -b linux-port https://github.com/jubeater/mcp-router.git
+cd mcp-router
+pnpm install
+pnpm turbo run build --filter='./packages/*'
+pnpm --filter @mcp_router/electron run package
+tools/linux/install.sh
 ```
 
-## 🚀 Features
+Then launch **MCP Router** from your app menu, or run `mcp-router`.
 
-### 📊 Centralized Server Management
-Easily toggle MCP servers on/off, enable/disable individual tools, and organize servers into Projects and Workspaces — all from a single dashboard
+`install.sh` installs for the current user only:
 
-<img src="https://raw.githubusercontent.com/mcp-router/mcp-router/main/public/images/readme/toggle.png" alt="Server Management" width="600">
+| What              | Where                                            |
+| ----------------- | ------------------------------------------------ |
+| App files         | `~/.local/share/mcp-router/app/`                 |
+| Command           | `~/.local/bin/mcp-router`                        |
+| Menu entry        | `~/.local/share/applications/mcp-router.desktop` |
+| Icon              | `~/.local/share/icons/hicolor/512x512/apps/`     |
+| `mcpr://` handler | registered with `xdg-mime`                       |
 
-<img src="https://raw.githubusercontent.com/mcp-router/mcp-router/main/public/images/readme/tool-toggle.png" alt="Toggle Tool" width="600">
+**Update:** pull, rebuild with the commands above, quit the app (tray → Quit), and run
+`tools/linux/install.sh` again.
 
-<img src="https://raw.githubusercontent.com/mcp-router/mcp-router/main/public/images/readme/project-management.png" alt="Project Management" width="600">
+**Uninstall:** `tools/linux/install.sh --uninstall`. Your settings and server data in
+`~/.config/MCP Router/` are kept; delete that folder too for a full removal.
 
-<img src="https://raw.githubusercontent.com/mcp-router/mcp-router/main/public/images/readme/workspace.png" alt="Workspace Management" width="600">
+## Connecting a client
 
+Add a custom app in MCP Router to get a token, then point your client at the router:
 
-### 🌐 Universal Connectivity
-Add and connect to any MCP server with support for both local and remote servers
+```bash
+export MCPR_TOKEN="mcpr_your_token"
+npx -y @mcp_router/cli connect                    # all servers
+npx -y @mcp_router/cli connect --project <name>   # one project
+```
 
-<img src="https://raw.githubusercontent.com/mcp-router/mcp-router/main/public/images/readme/add-mcp-manual.png" alt="Universal Connectivity" width="600">
+## Linux notes
 
-### 🔗 One-Click Integration
-Seamlessly connect with popular AI tools like Claude, Cline, Windsurf, Cursor, or your custom client
+- **Start at login:** MCP Router always adds itself to autostart
+  (`~/.config/autostart/mcp-router.desktop`), as the original does on macOS and Windows. With
+  "show window on startup" off, it starts hidden in the tray. Deleting the file only lasts until the
+  next launch.
+- **Saved secrets:** tokens are encrypted with your system keyring through the Secret Service API
+  (gnome-keyring, KeePassXC, or KWallet). On desktops Chromium doesn't recognize (niri, sway,
+  Hyprland, ...), the app selects this backend itself; without it, tokens would be stored unencrypted.
+  To choose a backend yourself, launch with `--password-store=<backend>`.
+- **Tray:** needs a system tray (StatusNotifierItem), e.g. Waybar's tray module on tiling compositors.
 
-<img src="https://raw.githubusercontent.com/mcp-router/mcp-router/main/public/images/readme/token.png" alt="One-Click Integration" width="600">
+## Changes from the original
 
-### 📈 Comprehensive Logging & Analytics
-Monitor and display detailed request logs
+All Linux changes are on the `linux-port` branch; `main` is the original final release, unchanged.
 
-<img src="https://raw.githubusercontent.com/mcp-router/mcp-router/main/public/images/readme/stats.png" alt="Logs and Statistics" width="600">
+- **Build:** pnpm hoisting config moved into `pnpm-workspace.yaml` (pnpm 10 ignores `.npmrc` for it,
+  and Electron Forge won't build without it); the Linux binary is named `mcp-router`; `desktopName`
+  is set so the window, launcher and `mcpr://` handler share one identity.
+- **Install:** added `tools/linux/install.sh`.
+- **Start at login:** writes an XDG autostart entry, since Electron's login-item API does nothing on Linux.
+- **`mcpr://` links:** a link that launches the app is now handled, not only links sent to a running app.
+- **Secrets:** selects the Secret Service keyring on unrecognized desktops (see above).
 
+## License
 
-## 🤝 Community
-
-Join our community to get help, share ideas, and stay updated:
-
-- 💬 [Discord Community](https://discord.com/invite/dwG9jPrhxB)
-- 🐦 [Follow us on X (Twitter)](https://x.com/mcp_router)
-- ⭐ [Star us on GitHub](https://github.com/mcp-router/mcp-router)
-
-[![Star History Chart](https://api.star-history.com/svg?repos=mcp-router/mcp-router&type=date&legend=top-left)](https://www.star-history.com/#mcp-router/mcp-router&type=date&legend=top-left)
-
-## 📝 License
-
-This project is licensed under the Sustainable Use License - see the [LICENSE.md](LICENSE.md) file for details.
+The original code is licensed under the Sustainable Use License, which still applies to this patch; see
+[LICENSE.md](LICENSE.md). In short: personal or internal use and modification are allowed, and
+distribution is allowed only free of charge for non-commercial purposes. All original license and
+copyright notices are kept unchanged.
