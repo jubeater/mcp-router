@@ -96,6 +96,8 @@
     "themeSystem": "System",
     "loadExternalMCPConfigs": "Load MCP configurations from external applications",
     "loadExternalMCPConfigsDescription": "Allow MCP Router to import server configurations from other applications like Claude for Desktop",
+    "launchAtLogin": "Launch at login",
+    "launchAtLoginDescription": "Start MCP Router automatically when you log in. Disable to start it manually.",
     "showWindowOnStartup": "Show main window at system startup",
     "showWindowOnStartupDescription": "Display MCP Router when your computer boots. Disable to start in the background."
   },

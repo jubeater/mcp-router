@@ -61,7 +61,10 @@ export class SettingsService extends SingletonService<
     try {
       const result = SettingsRepository.getInstance().saveSettings(settings);
       if (result) {
-        applyLoginItemSettings(settings.showWindowOnStartup ?? true);
+        applyLoginItemSettings(
+          settings.launchAtLogin ?? true,
+          settings.showWindowOnStartup ?? true,
+        );
         applyThemeSettings(settings.theme);
       }
       return result;
@@ -81,15 +84,18 @@ export function getSettingsService(): SettingsService {
 /**
  * OS起動時のウィンドウ表示設定に応じてログイン項目設定を更新
  */
-export function applyLoginItemSettings(showWindowOnStartup: boolean): void {
+export function applyLoginItemSettings(
+  launchAtLogin: boolean,
+  showWindowOnStartup: boolean,
+): void {
   if (process.platform === "linux") {
-    applyLinuxAutostart(showWindowOnStartup);
+    applyLinuxAutostart(launchAtLogin, showWindowOnStartup);
     return;
   }
 
   try {
     const loginItemOptions: Electron.Settings = {
-      openAtLogin: true,
+      openAtLogin: launchAtLogin,
     };
 
     if (process.platform === "darwin") {
@@ -108,7 +114,10 @@ export function applyLoginItemSettings(showWindowOnStartup: boolean): void {
  * Linux: app.setLoginItemSettings is a no-op, so write an XDG autostart entry
  * (~/.config/autostart/mcp-router.desktop) instead.
  */
-function applyLinuxAutostart(showWindowOnStartup: boolean): void {
+function applyLinuxAutostart(
+  launchAtLogin: boolean,
+  showWindowOnStartup: boolean,
+): void {
   // Only packaged builds have a stable executable path worth registering
   if (!app.isPackaged) return;
 
@@ -118,6 +127,13 @@ function applyLinuxAutostart(showWindowOnStartup: boolean): void {
     const configHome =
       process.env.XDG_CONFIG_HOME || path.join(os.homedir(), ".config");
     const autostartDir = path.join(configHome, "autostart");
+    const entryPath = path.join(autostartDir, "mcp-router.desktop");
+
+    if (!launchAtLogin) {
+      fs.rmSync(entryPath, { force: true });
+      return;
+    }
+
     const args = showWindowOnStartup ? "" : " --hidden";
     // Some launchers don't unquote Exec, so only quote paths that need it
     const exec = executable.includes(" ") ? `"${executable}"` : executable;
@@ -134,7 +150,7 @@ function applyLinuxAutostart(showWindowOnStartup: boolean): void {
     ].join("\n");
 
     fs.mkdirSync(autostartDir, { recursive: true });
-    fs.writeFileSync(path.join(autostartDir, "mcp-router.desktop"), entry);
+    fs.writeFileSync(entryPath, entry);
   } catch (error) {
     console.error("Failed to update Linux autostart entry:", error);
   }

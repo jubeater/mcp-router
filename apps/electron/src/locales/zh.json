@@ -61,6 +61,8 @@
     "themeLight": "浅色",
     "themeDark": "深色",
     "themeSystem": "系统",
+    "launchAtLogin": "登录时自动启动",
+    "launchAtLoginDescription": "登录系统时自动启动 MCP Router。关闭后需手动启动。",
     "showWindowOnStartup": "系统启动时显示主窗口",
     "showWindowOnStartupDescription": "当电脑启动时显示 MCP Router 主窗口。关闭后将在后台启动。",
     "loadExternalMCPConfigs": "从外部应用程序加载 MCP 配置",

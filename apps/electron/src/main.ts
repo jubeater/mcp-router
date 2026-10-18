@@ -365,9 +365,11 @@ async function initApplication(): Promise<void> {
 
   // 起動時のウィンドウ表示設定を取得
   const settingsService = getSettingsService();
+  let launchAtLogin = true;
   let showWindowOnStartup = true;
   try {
     const currentSettings = settingsService.getSettings();
+    launchAtLogin = currentSettings.launchAtLogin ?? true;
     showWindowOnStartup = currentSettings.showWindowOnStartup ?? true;
     applyThemeSettings(currentSettings.theme);
   } catch (error) {
@@ -383,7 +385,7 @@ async function initApplication(): Promise<void> {
     ["--hidden", "--minimized"].includes(arg),
   );
 
-  applyLoginItemSettings(showWindowOnStartup);
+  applyLoginItemSettings(launchAtLogin, showWindowOnStartup);
 
   // データベース初期化
   await initDatabase();

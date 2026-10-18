@@ -20,6 +20,7 @@ const Settings: React.FC = () => {
   const platformAPI = usePlatformAPI();
   const { theme, setTheme } = useThemeStore();
   const [loadExternalMCPConfigs, setLoadExternalMCPConfigs] = useState(true);
+  const [launchAtLogin, setLaunchAtLogin] = useState(true);
   const [showWindowOnStartup, setShowWindowOnStartup] = useState(true);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const handleLanguageChange = (value: string) => {
@@ -36,6 +37,7 @@ const Settings: React.FC = () => {
       .get()
       .then((settings) => {
         setLoadExternalMCPConfigs(settings.loadExternalMCPConfigs ?? true);
+        setLaunchAtLogin(settings.launchAtLogin ?? true);
         setShowWindowOnStartup(settings.showWindowOnStartup ?? true);
       })
       .catch(() => console.error("Failed to load settings"));
@@ -53,6 +55,24 @@ const Settings: React.FC = () => {
     } catch (error) {
       console.error("Failed to save settings:", error);
       setLoadExternalMCPConfigs(!checked);
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
+  // Handle launch at login toggle
+  const handleLaunchAtLoginToggle = async (checked: boolean) => {
+    setLaunchAtLogin(checked);
+    setIsSavingSettings(true);
+    try {
+      const currentSettings = await platformAPI.settings.get();
+      await platformAPI.settings.save({
+        ...currentSettings,
+        launchAtLogin: checked,
+      });
+    } catch (error) {
+      console.error("Failed to save launch at login settings:", error);
+      setLaunchAtLogin(!checked);
     } finally {
       setIsSavingSettings(false);
     }
@@ -135,6 +155,23 @@ const Settings: React.FC = () => {
             </Select>
           </div>
 
+          {/* Launch at Login */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <label className="text-sm font-medium">
+                {t("settings.launchAtLogin")}
+              </label>
+              <p className="text-xs text-muted-foreground">
+                {t("settings.launchAtLoginDescription")}
+              </p>
+            </div>
+            <Switch
+              checked={launchAtLogin}
+              onCheckedChange={handleLaunchAtLoginToggle}
+              disabled={isSavingSettings}
+            />
+          </div>
+
           {/* Show Window on Startup */}
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -148,7 +185,7 @@ const Settings: React.FC = () => {
             <Switch
               checked={showWindowOnStartup}
               onCheckedChange={handleStartupVisibilityToggle}
-              disabled={isSavingSettings}
+              disabled={isSavingSettings || !launchAtLogin}
             />
           </div>
 
